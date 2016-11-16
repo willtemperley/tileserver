@@ -46,14 +46,14 @@
 //    new L.tileLayer(urlTemplate).addTo(map);
 
 //    new L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png").addTo(map);
-    new L.tileLayer("http://localhost:8085/{z}/{x}/{y}", {
+    new L.tileLayer("http://hadoop-m2:8085/{z}/{x}/{y}", {
         layers: 'default',
         maxNativeZoom: 13,
         maxZoom: 18,
         tms: true
     }).addTo(map);
 
-    new L.tileLayer("http://localhost:8085/ras/{z}/{x}/{y}", {
+    new L.tileLayer("http://hadoop-m2:8085/ras/{z}/{x}/{y}", {
         layers: 'default',
         maxNativeZoom: 13,
         maxZoom: 18,
