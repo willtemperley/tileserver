@@ -46,23 +46,23 @@
 //    new L.tileLayer(urlTemplate).addTo(map);
 
 //    new L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png").addTo(map);
-    new L.tileLayer("http://hadoop-m2:8085/{z}/{x}/{y}", {
-        layers: 'default',
-        maxNativeZoom: 13,
-        maxZoom: 18,
-        tms: true
-    }).addTo(map);
+//    new L.tileLayer("http://hadoop-m2:8085/{z}/{x}/{y}", {
+//        layers: 'default',
+//        maxNativeZoom: 14,
+//        maxZoom: 18,
+//        tms: true
+//    }).addTo(map);
 
     new L.tileLayer("http://hadoop-m2:8085/ras/{z}/{x}/{y}", {
         layers: 'default',
-        maxNativeZoom: 13,
+        maxNativeZoom: 14,
         maxZoom: 18,
         tms: true
     }).addTo(map);
 
     var mada = L.geoJson(madagascar).addTo(map);
 
-    map.setView([-27, 44], 6);
+    map.setView([-27, 44], 14);
 
 </script>
 </body>

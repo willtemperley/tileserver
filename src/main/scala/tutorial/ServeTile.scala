@@ -3,6 +3,7 @@ package tutorial
 import akka.actor._
 import akka.io.IO
 import java.io._
+import java.nio.ByteBuffer
 import java.nio.file.{Files, Paths}
 import java.util
 import javax.xml.bind.DatatypeConverter
@@ -26,8 +27,6 @@ import scala.concurrent._
 object ServeTile {
   //  val catalogPath = new java.io.File("data/catalog").getAbsolutePath
 
-
-
   // Create a reader that will read in the indexed tiles we produced in IngestImage.
 
   def main(args: Array[String]): Unit = {
@@ -50,7 +49,7 @@ class TileServiceActor extends Actor with HttpService {
 
   def actorRefFactory = context
 
-  def receive = runRoute(root ~ staticRoute ~ debugGeomRoute ~ myService)
+  def receive = runRoute(staticRoute ~ debugGeomRoute ~ myService)
 
   def staticRoute = pathPrefix("static") {
     getFromResourceDirectory("static")
@@ -62,10 +61,8 @@ class TileServiceActor extends Actor with HttpService {
         complete {
           future {
 
-
-            val tile = new Tile(x, y, zoom)
-            println(tile)
-            getRaster(tile)
+//            val tile = new Tile(x, y, zoom)
+            getRaster(x, y, zoom)
 
           }
         }
@@ -79,13 +76,31 @@ class TileServiceActor extends Actor with HttpService {
     b
   }
 
-  def getRaster(tile: Tile): Array[Byte] = {
+  def getDebugTile(x: Int, y: Int, z: Int): Array[Byte] = {
 
-    val table = AccessHbase.getTable("buff")
+    val txt = z + "," + x + "," + y
 
-    val result = table.get(new Get(TileCalculator.encodeTile(tile)))
+    TextToGraphics.renderText(txt)
+
+  }
+
+  def getRaster(x: Int, y: Int, z: Int): Array[Byte] = {
+
+    val table = AccessHbase.getTable("buffer14")
+
+    val tile = new Tile(x, y, z)
+    val get = new Get(tile.encode())
+    //    val result = table.get(new Get(TileCalculator.encodeTile(tile)))
+    val result = table.get(get)
 
     val img = result.getValue(tileCF, tileCol)
+
+    if (img == null)  {
+      println("null tile: " + tile)
+      val exists = table.exists(get)
+      println("row exists: " + exists)
+      return getDebugTile(x, y, z)
+    }
 
     img
   }
@@ -140,23 +155,23 @@ class TileServiceActor extends Actor with HttpService {
     x
   }
 
-  def root =
-    pathPrefix(IntNumber / IntNumber / IntNumber) { (zoom, x, y) =>
-      respondWithMediaType(MediaTypes.`image/png`) {
-        complete {
-          future {
-
-            val xD = (360D / (2 << zoom)) * x - 180
-            val yD = (180D / (1 << zoom)) * y - 90
-
-            //            val txt = zoom + "," + xD + "," + yD
-            val txt = zoom + "," + x + "," + y
-            //            println(txt)
-
-            TextToGraphics.renderText(txt)
-
-          }
-        }
-      }
-    }
+//  def root =
+//    pathPrefix(IntNumber / IntNumber / IntNumber) { (zoom, x, y) =>
+//      respondWithMediaType(MediaTypes.`image/png`) {
+//        complete {
+//          future {
+//
+//            val xD = (360D / (2 << zoom)) * x - 180
+//            val yD = (180D / (1 << zoom)) * y - 90
+//
+//            //            val txt = zoom + "," + xD + "," + yD
+//            val txt = zoom + "," + x + "," + y
+//            //            println(txt)
+//
+//            TextToGraphics.renderText(txt)
+//
+//          }
+//        }
+//      }
+//    }
 }
