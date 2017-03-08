@@ -16,11 +16,12 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.protobuf.generated.HBaseProtos.TableName
 import org.apache.hadoop.hbase.client.{Get, Table}
 import org.apache.hadoop.hbase.util.Bytes
+import org.openstreetmap.osmosis.core.util.TileCalculator
 import spray.can.Http
 import spray.http.MediaTypes
 import spray.routing.{HttpService, Route}
-import xyz.TileCalculator.Tile
-import xyz.{TextToGraphics, TileCalculator}
+import xyz.TextToGraphics
+import xyz.tms.{TmsTile, TmsTileCalculator}
 
 import scala.concurrent._
 
@@ -61,7 +62,7 @@ class TileServiceActor extends Actor with HttpService {
         complete {
           future {
 
-//            val tile = new Tile(x, y, zoom)
+//            val tile = new TmsTile(x, y, zoom)
             getRaster(x, y, zoom)
 
           }
@@ -88,7 +89,7 @@ class TileServiceActor extends Actor with HttpService {
 
     val table = AccessHbase.getTable("buffer14")
 
-    val tile = new Tile(x, y, z)
+    val tile = new TmsTile(x, y, z)
     val get = new Get(tile.encode())
     //    val result = table.get(new Get(TileCalculator.encodeTile(tile)))
     val result = table.get(get)
@@ -128,7 +129,7 @@ class TileServiceActor extends Actor with HttpService {
 
         val env = new Envelope2D()
         x.getGeometry.queryEnvelope2D(env)
-        val tiles = TileCalculator.tilesForEnvelope(env, zoom)
+        val tiles = TmsTileCalculator.tilesForEnvelope(env, zoom)
 
         println(zoom)
 //        val scale = tiles.get(0).getScale
